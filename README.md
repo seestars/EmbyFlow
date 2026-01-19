@@ -41,9 +41,20 @@
     /volume1/@appstore/EmbyServer/system/dashboard-ui/
     ```
 
-2. 将以下文件复制到该目录：
+2. 下载以下文件并复制到该目录：
 
     - `home.js`
+
+    ```bash
+    # Linux（curl）- 下载文件到当前目录
+    curl -L -o home.js "https://raw.githubusercontent.com/seestars/EmbyFlow/main/home.js"'
+
+    # Linux（wget）- 下载文件到当前目录
+    wget -O home.js "https://raw.githubusercontent.com/seestars/EmbyFlow/main/home.js"'
+
+    # Linux（curl）- 群晖系统（根据实际更改）
+    sudo su -c 'cd /volume1/@appstore/EmbyServer/system/dashboard-ui && curl -L -o home.js "https://raw.githubusercontent.com/seestars/EmbyFlow/main/home.js"'
+    ```
 
 3. 编辑 `index.html`，在 `</head>` 前加入：
 
@@ -66,8 +77,46 @@
 
 
 
-Docker Compose版Emby：
-1. 首先
+Docker Compose（容器）部署：
+
+1. 下载并复制文件
+
+    从仓库下载以下文件，放到你的 Compose 项目目录（与 `docker-compose.yml` 同级）：
+
+     - `home.js`
+     - `script.sh`
+
+    ```bash
+    # Linux（curl）- 下载文件到当前目录
+    curl -L -o home.js "https://raw.githubusercontent.com/seestars/EmbyFlow/main/home.js"
+    curl -L -o script.sh "https://raw.githubusercontent.com/seestars/EmbyFlow/main/script.sh"
+    chmod +x script.sh
+
+    # Linux（wget）
+    wget -O home.js "https://raw.githubusercontent.com/seestars/EmbyFlow/main/home.js"
+    wget -O script.sh "https://raw.githubusercontent.com/seestars/EmbyFlow/main/script.sh"
+    chmod +x script.sh
+    ```
+
+2. 修改 `docker-compose.yml`
+
+    在 Emby 服务的 `volumes` 配置中添加挂载，将脚本注入容器并覆盖 UI 文件：
+
+     ```yaml
+     # 在 emby 服务下的 volumes 中添加：
+     - ./script.sh:/etc/cont-init.d/99-custom-patch.sh
+     - ./home.js:/system/dashboard-ui/home.js
+     ```
+
+3. 重启 Emby 容器
+
+    在宿主机或通过 SSH 运行：
+
+     ```bash
+     docker compose restart
+     ```
+
+    重启后首页应显示轮播横幅。`script.sh` 会在容器启动时注入脚本，能在更新后保持主页显示。
 
 ---
 
