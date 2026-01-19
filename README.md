@@ -56,7 +56,7 @@
     sudo su -c 'cd /volume1/@appstore/EmbyServer/system/dashboard-ui && curl -L -o home.js "https://raw.githubusercontent.com/seestars/EmbyFlow/main/home.js"'
     ```
 
-3. 编辑 `index.html`，在 `</head>` 前加入：
+3. 编辑 `index.html`，在 `<body>` 中加入：
 
     ```html
     <!-- EmbyFlow -->
@@ -102,11 +102,11 @@ Docker Compose（容器）部署：
 
     在 Emby 服务的 `volumes` 配置中添加挂载，将脚本注入容器并覆盖 UI 文件：
 
-     ```yaml
-     # 在 emby 服务下的 volumes 中添加：
-     - ./script.sh:/etc/cont-init.d/99-custom-patch.sh
-     - ./home.js:/system/dashboard-ui/home.js
-     ```
+    ```yaml
+          # 在 emby 服务下的 volumes 中添加：
+          - ./script.sh:/etc/cont-init.d/99-custom-patch.sh
+          - ./home.js:/system/dashboard-ui/home.js
+    ```
 
 3. 重启 Emby 容器
 
