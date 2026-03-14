@@ -1461,26 +1461,28 @@ div.dialogContainer {
 		}
 		document.addEventListener("viewbeforeshow", async function (e) {
 			this.flag_cssjs = false;
-			if (e.detail.type === "home") {
+			if (e.detail && e.detail.type === "home") {
 				if (!e.detail.isRestored) {
 					!document.getElementById("SwiperCss") && CommonUtils.loadExtastyle(this.SwiperCss, 'SwiperCss');
 					!document.getElementById("customCss") && CommonUtils.loadExtastyle(this.customCss, 'customCss');
 					let swiperLibraryAccess = localStorage.getItem(ApiClient.getCurrentUserId() + "-swiperLibraryAccess");
 					this.user = swiperLibraryAccess ? JSON.parse(swiperLibraryAccess) : { Policy: { EnableAllFolders: true, EnabledFolders: [] } };
-					!localStorage.getItem('CACHE|Movies-Date') && !this.loadFlag && e.detail.contextPath.endsWith("home") && this.initLoading();
+					!localStorage.getItem('CACHE|Movies-Date') && !this.loadFlag && ((e.detail.contextPath || '') + (window.location.hash || '')).includes("home") && this.initLoading();
 					e.target.setAttribute("data-type", "home");
 					this.mutation = new MutationObserver(async function (mutationRecoards) {
 						for (let mutationRecoard of mutationRecoards) {
                                 if (mutationRecoard.target.classList.contains("homeSectionsContainer")) {
+                                    let view = document.querySelector(".view:not(.hide)");
+                                    let sections = view ? view.querySelector(".sections") : mutationRecoard.target.querySelector(".sections");
+                                    if (!sections) continue;
                                     this.mutation.disconnect();
 									!document.getElementById("SwiperCss") && CommonUtils.loadExtastyle(this.SwiperCss, 'SwiperCss');
 									!document.getElementById("customCss") && CommonUtils.loadExtastyle(this.customCss, 'customCss');
-									let sections = e.target.querySelector(".sections"),
-										elem = await this.initBanner();
+									let elem = await this.initBanner();
 									if (elem) {
 										sections.parentNode.insertBefore(elem, sections);
 										this.loadFlag && this.fadeOut(document.querySelector(".misty-loading"), 500, () => document.querySelector(".misty-loading").remove());
-										this.initSwiper(e.target);
+										this.initSwiper(view || mutationRecoard.target);
 									} else {
 										this.loadFlag && this.fadeOut(document.querySelector(".misty-loading"), 500, () => document.querySelector(".misty-loading").remove());
 										document.getElementById("customCss").remove();
@@ -1511,7 +1513,7 @@ div.dialogContainer {
 				this.mutation?.disconnect();
 				this.swiper2?.disable();
 				this.swiper2?.slides[this.swiper2.activeIndex]?.childNodes[1].swiper?.autoplay.stop();
-				if (e.detail.type === "settings" && e.detail.title === "HeaderHomeScreen") {
+				if (e.detail && e.detail.type === "settings" && e.detail.title === "HeaderHomeScreen") {
 
 					if (!e.detail.isRestored) {
 						let swiperLibraryAccess = localStorage.getItem(ApiClient.getCurrentUserId() + "-swiperLibraryAccess");
@@ -1590,16 +1592,19 @@ div.dialogContainer {
 				return;
 			}
 			let view = document.querySelector(".view:not(.hide)");
-			if (view?.controller?.constructor.name === "HomeView") {
+			let isHome = view && ((window.location.hash || '').includes("home") || view.getAttribute("data-type") === "home" || view?.controller?.constructor.name === "HomeView");
+			if (isHome) {
 				for (let mutationRecoard of mutationRecoards) {
 				if (mutationRecoard.target.classList.contains("homeSectionsContainer")) {
+					let sections = mutationRecoard.target.querySelector(".sections");
+					if (!sections) continue;
 					this.mutation_cssjs.disconnect();
 					this.flag_cssjs = false;
 					!document.getElementById("SwiperCss") && CommonUtils.loadExtastyle(this.SwiperCss, 'SwiperCss');
 					!document.getElementById("customCss") && CommonUtils.loadExtastyle(this.customCss, 'customCss');
-					!localStorage.getItem('CACHE|Movies-Date') && !this.loadFlag && e.detail.contextPath.endsWith("home") && this.initLoading();
-					let sections = mutationRecoard.target.querySelector(".sections"),
-						elem = await this.initBanner();
+					!localStorage.getItem('CACHE|Movies-Date') && !this.loadFlag && (window.location.hash || "").includes("home") && this.initLoading();
+					
+					let elem = await this.initBanner();
 					if (elem) {
 						sections.parentNode.insertBefore(elem, sections);
 						this.loadFlag && this.fadeOut(document.querySelector(".misty-loading"), 500, () => document.querySelector(".misty-loading").remove());
